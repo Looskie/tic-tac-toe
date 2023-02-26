@@ -161,7 +161,7 @@ export default function Game() {
   // game creator is always x
   const playersIndicator = game.players[0] === Api.user_id ? "X" : "O";
 
-  return !game || game.players.length < 2 ? (
+  return game.players.length < 2 ? (
     <>
       <Container>
         <h1>waiting for players...</h1>
