@@ -1,10 +1,8 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
-import { nanoid } from "nanoid";
-import { hop } from "../../utils/Hop";
-import { ChannelType } from "@onehop/js";
-import { MESSAGE_NAMES } from "../../utils/Commons";
 import { GameState } from "../../types";
+import { MESSAGE_NAMES } from "../../utils/Commons";
+import { hop } from "../../utils/Hop";
 
 export default async function handler(
   req: NextApiRequest,
@@ -51,7 +49,7 @@ export default async function handler(
     turn: newTurn,
   });
 
-  gameChannel.publishMessage(MESSAGE_NAMES.UPDATE_GAME, {
+  await gameChannel.publishMessage(MESSAGE_NAMES.UPDATE_GAME, {
     board: newBoard,
     turn: newTurn,
   });
@@ -63,7 +61,6 @@ export default async function handler(
   const winner = checkWinner(newBoard);
 
   if (winner !== null) {
-    console.log("winner", winner);
     await gameChannel.publishMessage(MESSAGE_NAMES.GAME_OVER, {
       winner: winner === "X" ? xUser : oUser,
     });

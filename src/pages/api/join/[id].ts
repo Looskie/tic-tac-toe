@@ -61,7 +61,7 @@ export default async function handler(
   }
 
   // player join
-  hop.channels.publishMessage(gameID, MESSAGE_NAMES.PLAYER_JOIN, {
+  await hop.channels.publishMessage(gameID, MESSAGE_NAMES.PLAYER_JOIN, {
     userId: req.body.userID,
     players: newPlayers,
     turn,
