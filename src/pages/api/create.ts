@@ -28,6 +28,7 @@ export default async function handler(
         board: new Array(3).fill(new Array(3).fill(undefined)),
         turn: "",
         winner: null,
+        created_at: new Date().toISOString(),
       },
     }
   );
