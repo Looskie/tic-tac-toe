@@ -64,6 +64,14 @@ export default function Home() {
     router.push(`/game/${game.id}`);
   };
 
+  if (creating)
+    return (
+      <>
+        <h1>capybara Tic-Tac-Toe</h1>
+        <span>creating game...</span>
+      </>
+    );
+
   return (
     <>
       <h1>capybara Tic-Tac-Toe</h1>
