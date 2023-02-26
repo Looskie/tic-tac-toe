@@ -1,10 +1,9 @@
-import { styled } from "../stitches.config";
-import { useState } from "react";
-import { Api } from "../utils/Api";
 import { useRouter } from "next/router";
-import { Polka } from "../components/Polka";
+import { useState } from "react";
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
+import { styled } from "../stitches.config";
+import { Api } from "../utils/Api";
 
 const GameTypeWrapper = styled("div", {
   display: "flex",
