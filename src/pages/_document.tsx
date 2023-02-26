@@ -12,7 +12,7 @@ export default function Document() {
         />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="capy.lol" />
-        <meta property="og:title" content="Capybara API" />
+        <meta property="og:title" content="Capybara Tic Tac Toe" />
         <meta
           property="og:description"
           content="Join your friends to play capybara tic-tac-toe!"
