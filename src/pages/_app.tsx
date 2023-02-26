@@ -55,11 +55,11 @@ export default function App({ Component, pageProps }: AppProps) {
       return;
     }
 
-    const user_id = sessionStorage.getItem("user_id");
+    const user_id = localStorage.getItem("user_id");
 
     if (!user_id) {
-      // define user state in session storage with nanoid
-      sessionStorage.setItem("user_id", nanoid(15));
+      // define user state in local storage with nanoid
+      localStorage.setItem("user_id", nanoid(15));
     }
 
     hop.init({

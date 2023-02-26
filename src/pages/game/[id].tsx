@@ -7,6 +7,7 @@ import { styled } from "../../stitches.config";
 import { FetchCapybaraResponse, GameState } from "../../types";
 import { Api } from "../../utils/Api";
 import { MESSAGE_NAMES } from "../../utils/Commons";
+import { checkWinner } from "../../utils/Helpers";
 
 const Container = styled("div", {
   display: "flex",
@@ -137,7 +138,11 @@ export default function Game() {
     return (
       <Container>
         <h1>game over!</h1>
-        <p>you {game.winner === Api.user_id ? "won!" : "lost :("}</p>
+        {game.winner === "draw" ? (
+          <p>its a draw!</p>
+        ) : (
+          <p>you {game.winner === Api.user_id ? "won!" : "lost :("}</p>
+        )}
         <img
           src={
             game.winner === Api.user_id
@@ -204,11 +209,22 @@ export default function Game() {
                   Api.move(gameID as string, rowIndex, columnIndex);
 
                   newBoard[rowIndex][columnIndex] = playersIndicator;
+
+                  const winner = checkWinner(newBoard);
                   // set the new board state from row column
                   setGame({
                     ...game,
                     board: newBoard,
                     turn: game.players.find((p) => p !== Api.user_id) ?? "",
+                    winner:
+                      winner !== null
+                        ? /* if there is a winner and the winner is x player 1 wins otherwise it is player 2 */
+                          winner === "draw"
+                          ? "draw"
+                          : winner === "X"
+                          ? game.players[0]
+                          : game.players[1]
+                        : null,
                   });
                 }}
               >

@@ -3,7 +3,7 @@ import { GameState } from "../types";
 export class Api {
   public static user_id =
     typeof window !== "undefined"
-      ? sessionStorage.getItem("user_id")
+      ? localStorage.getItem("user_id")
       : "lol xddd";
 
   static async createGame() {

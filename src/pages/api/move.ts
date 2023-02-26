@@ -2,6 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { GameState } from "../../types";
 import { MESSAGE_NAMES } from "../../utils/Commons";
+import { checkWinner } from "../../utils/Helpers";
 import { hop } from "../../utils/Hop";
 
 export default async function handler(
@@ -60,57 +61,13 @@ export default async function handler(
   // check if game is over
   const winner = checkWinner(newBoard);
 
+  res.status(204);
+
   if (winner !== null) {
     await gameChannel.publishMessage(MESSAGE_NAMES.GAME_OVER, {
-      winner: winner === "X" ? xUser : oUser,
+      winner: winner === "draw" ? "draw" : winner === "X" ? xUser : oUser,
     });
 
     hop.channels.delete(gameID);
   }
-
-  res.status(204);
 }
-
-const checkWinner = (board: string[][]): string | null => {
-  // Check rows
-  for (let i = 0; i < 3; i++) {
-    if (
-      board[i][0] === board[i][1] &&
-      board[i][1] === board[i][2] &&
-      board[i][0] !== null
-    ) {
-      return board[i][0];
-    }
-  }
-
-  // Check columns
-  for (let j = 0; j < 3; j++) {
-    if (
-      board[0][j] === board[1][j] &&
-      board[1][j] === board[2][j] &&
-      board[0][j] !== null
-    ) {
-      return board[0][j];
-    }
-  }
-
-  // Check diagonals
-  if (
-    board[0][0] === board[1][1] &&
-    board[1][1] === board[2][2] &&
-    board[0][0] !== null
-  ) {
-    return board[0][0];
-  }
-
-  if (
-    board[0][2] === board[1][1] &&
-    board[1][1] === board[2][0] &&
-    board[0][2] !== null
-  ) {
-    return board[0][2];
-  }
-
-  // If there is no winner, return null
-  return null;
-};
