@@ -4,3 +4,10 @@ export interface GameState {
   turn: string;
   winner: string | null;
 }
+
+export interface FetchCapybaraResponse {
+  url: string;
+  index: number;
+  width: number;
+  height: number;
+}

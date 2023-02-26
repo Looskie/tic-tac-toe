@@ -1,10 +1,43 @@
 import { useChannelMessage } from "@onehop/react";
+import Image from "next/image";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { Button } from "../../components/Button";
 import { styled } from "../../stitches.config";
-import { GameState } from "../../types";
+import { FetchCapybaraResponse, GameState } from "../../types";
 import { Api } from "../../utils/Api";
 import { MESSAGE_NAMES } from "../../utils/Commons";
+
+const Container = styled("div", {
+  display: "flex",
+  flexDirection: "column",
+  textAlign: "center",
+  gap: 10,
+
+  "> img": {
+    maxWidth: 400,
+    maxHeight: 300,
+    borderRadius: 5,
+    border: "2px solid $bg-tertiary",
+  },
+
+  "> p": {
+    maxWidth: "30ch",
+    userSelect: "none",
+  },
+
+  span: {
+    fontWeight: "bold",
+    color: "$text-primary",
+    userSelect: "text",
+  },
+});
+
+const BtnWrapper = styled("div", {
+  display: "flex",
+  gap: 10,
+  alignSelf: "center",
+});
 
 const Grid = styled("button", {
   display: "grid",
@@ -13,25 +46,25 @@ const Grid = styled("button", {
   gap: 10,
 
   "> button": {
-    border: "1px solid black",
+    border: "1px solid $bg-tertiary",
     borderRadius: 5,
     padding: 10,
-    fontSize: 20,
+    fontSize: 50,
     width: 100,
     height: 100,
     cursor: "pointer",
-    backgroundColor: "black",
+    backgroundColor: "$bg-secondary",
 
     "&:hover": {
-      backgroundColor: "gray",
-      color: "white",
+      backgroundColor: "$bg-tertiary",
     },
   },
 });
 
 export default function Game() {
+  const [loading, setLoading] = useState(true);
   const [game, setGame] = useState<GameState | null>(null);
-  const [gameOver, setGameOver] = useState<string | null>(null);
+  const [capybara, setCapybara] = useState<FetchCapybaraResponse | null>(null);
 
   const router = useRouter();
   const gameID = router.query.id;
@@ -49,12 +82,14 @@ export default function Game() {
   useChannelMessage<{
     userId: string;
     players: string[];
+    turn: string;
   }>(gameID as string, MESSAGE_NAMES.PLAYER_JOIN, (data) => {
     if (!game) return;
 
     setGame({
       ...game,
       players: data.players,
+      turn: data.turn,
     });
   });
 
@@ -63,39 +98,93 @@ export default function Game() {
   }>(gameID as string, MESSAGE_NAMES.GAME_OVER, (data) => {
     if (!game) return;
 
-    setGameOver(data.winner.length === 0 ? "draw" : data.winner);
+    setGame({
+      ...game,
+      winner: data.winner,
+    });
   });
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!gameID) return;
 
-    Api.joinGame(gameID as string).then((game) => {
-      if ("success" in game) {
-        router.push("/");
-        return;
-      }
+    setLoading(true);
+    Api.joinGame(gameID as string)
+      .then((game) => {
+        if ("success" in game) {
+          router.push("/");
+          return;
+        }
 
-      setGame(game);
-    });
+        setGame(game);
+      })
+      .finally(() => setLoading(false));
   }, [gameID]);
 
-  return !game || game?.players?.length < 2 ? (
+  const fetchCapybara = async () => {
+    const capy = (await fetch("https://api.capy.lol/v1/capybara", {
+      headers: {
+        Accept: "application/json",
+      },
+    }).then((res) => res.json())) as { data: FetchCapybaraResponse };
+
+    setCapybara(capy.data);
+  };
+
+  if (!game || loading) return <Container>loading...</Container>;
+
+  if (game.winner)
+    return (
+      <Container>
+        <h1>game over!</h1>
+        <p>you {game.winner === Api.user_id ? "won!" : "lost :("}</p>
+        <img
+          src={
+            game.winner === Api.user_id
+              ? "https://api.capy.lol/v1/capybara/149"
+              : "https://preview.redd.it/lzinlzzzgr481.jpg?width=640&crop=smart&auto=webp&s=e6aba10ce513791107e89e8106255b8c6903f86e"
+          }
+        />
+        <BtnWrapper>
+          <Button onClick={() => router.push("/")} secondary>
+            back to lobby
+          </Button>
+        </BtnWrapper>
+      </Container>
+    );
+
+  return !game || game.players.length < 2 ? (
     <>
-      <h1>Waiting for other player...</h1>
-      <span>Your game code is {gameID}</span>
+      <Container>
+        <h1>waiting for players...</h1>
+        <p>
+          Your code is <span>{gameID}</span> in the meantime, want to view a
+          capybara?
+        </p>
+        <BtnWrapper>
+          <Button onClick={fetchCapybara} secondary>
+            capy!
+          </Button>
+          <Button onClick={() => alert("wrong!")} secondary>
+            no :(
+          </Button>
+        </BtnWrapper>
+        {capybara ? (
+          <Image
+            alt={capybara.index + "Capybara"}
+            src={capybara.url}
+            width={capybara.width}
+            height={capybara.height}
+          />
+        ) : null}
+      </Container>
     </>
   ) : (
-    <>
-      {gameOver !== null ? (
-        <h1>{gameOver === Api.user_id ? "You won!" : "you lost!"}</h1>
-      ) : null}
-
-      {gameOver === null && game.turn === Api.user_id ? (
-        <h1>Your turn</h1>
-      ) : gameOver === null ? (
-        <h1>Waiting for other player...</h1>
-      ) : null}
+    <Container>
+      <h1>
+        {game.turn === Api.user_id ? "your " : "waiting for player's "}
+        turn!
+      </h1>
       <Grid>
         {game.board.map((value, rowIndex) => {
           return value.map((value, columnIndex) => {
@@ -112,6 +201,6 @@ export default function Game() {
           });
         })}
       </Grid>
-    </>
+    </Container>
   );
 }

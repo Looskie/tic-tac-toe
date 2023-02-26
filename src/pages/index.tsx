@@ -2,104 +2,106 @@ import { styled } from "../stitches.config";
 import { useState } from "react";
 import { Api } from "../utils/Api";
 import { useRouter } from "next/router";
+import { Polka } from "../components/Polka";
+import { Button } from "../components/Button";
+import { Input } from "../components/Input";
 
-const Container = styled("div", {
+const GameTypeWrapper = styled("div", {
   display: "flex",
+  gap: 10,
+  justifyContent: "flex-start",
+  alignItems: "flex-start",
+});
+
+const GameType = styled("button", {
+  display: "flex",
+  flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
-  border: "1px solid white",
-  padding: "15px 20px",
-  borderRadius: "5px",
   gap: 10,
-  background: "AntiqueWhite",
+  cursor: "pointer",
+  padding: "15px 20px",
+  transition: "transform 0.2s ease-in-out",
+  willChange: "transform",
 
   "> div": {
     display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    color: "black",
+    gap: 10,
+  },
 
-    "> input": {
-      border: "1px solid black",
-      borderRadius: 5,
-      padding: 10,
-      fontSize: 20,
-    },
+  "&:hover": {
+    transform: "scale(1.05)",
+  },
 
-    button: {
-      border: "1px solid black",
-      borderRadius: 5,
-      padding: 10,
-      fontSize: 20,
-      cursor: "pointer",
-      backgroundColor: "black",
-      color: "white",
-      marginTop: 10,
-      marginRight: 10,
-    },
-
-    "> p": {
-      color: "grey",
-      maxWidth: "30ch",
-      textAlign: "center",
+  variants: {
+    noScale: {
+      true: {
+        transform: "none!important",
+      },
     },
   },
 });
 
 export default function Home() {
-  const [selectedUI, setSelectedUI] = useState<"join" | "create" | null>(null);
+  const [showJoinGameUI, setShowJoinGameUI] = useState(false);
+  const [creating, setCreating] = useState(false);
   const [gameIDInput, setGameIDInput] = useState("");
 
   const router = useRouter();
 
-  return (
-    <Container>
-      {selectedUI === null ? (
-        <>
-          <div onClick={() => setSelectedUI("join")}>
-            <h1>Join Game</h1>
-            <p>If you have a game ID already, you can join it here.</p>
-          </div>
-          <div
-            onClick={async () => {
-              const game = await Api.createGame();
+  const joinGame = () => {
+    if (gameIDInput.length !== 5)
+      return alert("Game ID must be 5 characters long");
 
-              router.push(`/game/${game.id}`);
-            }}
-          >
-            <h1>Create Game</h1>
-            <p>Create a tic-tac-toe game and play against your friends</p>
-          </div>
-        </>
+    router.push(`/game/${gameIDInput}`);
+  };
+
+  const createGame = async () => {
+    if (creating) return;
+    setCreating(true);
+    const game = await Api.createGame();
+    setCreating(false);
+
+    router.push(`/game/${game.id}`);
+  };
+
+  return (
+    <>
+      <h1>capybara Tic-Tac-Toe</h1>
+      {!showJoinGameUI ? (
+        <GameTypeWrapper>
+          <GameType onClick={() => setShowJoinGameUI(true)}>
+            <h1>join game</h1>
+            <p>if you have a game ID already, you can join it here.</p>
+          </GameType>
+          <GameType onClick={createGame}>
+            <h1>create game</h1>
+            <p>create a tic-tac-toe game and play against your friends</p>
+          </GameType>
+        </GameTypeWrapper>
       ) : (
-        <div>
-          <h1>Join Game</h1>
-          <input
+        <GameType noScale={true}>
+          <h1>join game</h1>
+          <Input
             value={gameIDInput}
             onChange={({ target: { value } }) => setGameIDInput(value)}
             placeholder="Game ID"
           />
           <div>
-            <button
+            <Button
               onClick={() => {
-                setSelectedUI(null);
+                setShowJoinGameUI(false);
               }}
+              secondary
             >
-              Back
-            </button>
-            <button
-              onClick={async () => {
-                if (gameIDInput.length !== 5)
-                  return alert("Game ID must be 5 characters long");
-                router.push(`/game/${gameIDInput}`);
-              }}
-            >
-              Join
-            </button>
+              back
+            </Button>
+            <Button onClick={joinGame} secondary>
+              join
+            </Button>
           </div>
-        </div>
+        </GameType>
       )}
-    </Container>
+    </>
   );
 }

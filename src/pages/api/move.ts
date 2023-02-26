@@ -16,11 +16,14 @@ export default async function handler(
   const userID = req.body.userID;
   const [row, column] = req.body.move;
 
-  const gameChannel = await hop.channels.get(gameID);
-  if (!gameChannel)
-    return res.status(404).json({
+  const gameChannel = await hop.channels.get(gameID).catch((err) => {
+    res.status(404).json({
       success: false,
     });
+
+    return null;
+  });
+  if (!gameChannel) return;
 
   const gameChannelState = gameChannel.state as unknown as GameState;
   if (!gameChannelState.players.includes(userID))
@@ -60,10 +63,12 @@ export default async function handler(
   const winner = checkWinner(newBoard);
 
   if (winner !== null) {
-    hop.channels.delete(gameID);
-    gameChannel.publishMessage(MESSAGE_NAMES.GAME_OVER, {
+    console.log("winner", winner);
+    await gameChannel.publishMessage(MESSAGE_NAMES.GAME_OVER, {
       winner: winner === "X" ? xUser : oUser,
     });
+
+    hop.channels.delete(gameID);
   }
 
   res.status(204);
