@@ -168,7 +168,8 @@ export default function Game() {
           <Button onClick={fetchCapybara} secondary>
             capy!
           </Button>
-          <Button onClick={() => alert("wrong!")} secondary>
+          {/* fetch capybara anyways lol!!! */}
+          <Button onClick={fetchCapybara} secondary>
             no :(
           </Button>
         </BtnWrapper>
