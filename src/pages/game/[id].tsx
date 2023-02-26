@@ -153,6 +153,9 @@ export default function Game() {
       </Container>
     );
 
+  // game creator is always x
+  const playersIndicator = game.players[0] === Api.user_id ? "X" : "O";
+
   return !game || game.players.length < 2 ? (
     <>
       <Container>
@@ -192,7 +195,20 @@ export default function Game() {
               <button
                 key={`${rowIndex}-${columnIndex}`}
                 onClick={() => {
+                  if (game.turn !== Api.user_id) return;
+
+                  const newBoard = game.board;
+                  if (newBoard[rowIndex][columnIndex]) return;
+
                   Api.move(gameID as string, rowIndex, columnIndex);
+
+                  newBoard[rowIndex][columnIndex] = playersIndicator;
+                  // set the new board state from row column
+                  setGame({
+                    ...game,
+                    board: newBoard,
+                    turn: game.players.find((p) => p !== Api.user_id) ?? "",
+                  });
                 }}
               >
                 {value ?? ""}
@@ -201,6 +217,7 @@ export default function Game() {
           });
         })}
       </Grid>
+      <span>Your are {playersIndicator}</span>
     </Container>
   );
 }
