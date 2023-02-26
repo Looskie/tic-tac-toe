@@ -73,5 +73,6 @@ export default async function handler(
     players: newPlayers,
     turn,
     winner: gameChannelState.winner,
+    created_at: gameChannelState.created_at,
   });
 }
