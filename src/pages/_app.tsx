@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { nanoid } from "nanoid";
 import { hop } from "@onehop/client";
 import { Polka } from "../components/Polka";
+import { PROJECT_ID } from "../utils/Commons";
 
 const Wrapper = styled("div", {
   display: "flex",
@@ -62,7 +63,7 @@ export default function App({ Component, pageProps }: AppProps) {
     }
 
     hop.init({
-      projectId: "project_MTEzNjc2NjIzOTg2Njg4MTI5",
+      projectId: PROJECT_ID,
     });
   }, []);
 

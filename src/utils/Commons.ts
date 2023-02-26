@@ -6,3 +6,5 @@ export const MESSAGE_NAMES = {
   START_GAME: "START_GAME",
   GAME_OVER: "GAME_OVER",
 };
+
+export const PROJECT_ID = "project_MTEzNjc2NjIzOTg2Njg4MTI5";
