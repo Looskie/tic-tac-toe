@@ -9,10 +9,6 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  if (req.query.key !== process.env.SUPER_SECRET_CRON_SECRET) {
-    res.status(404).end();
-    return;
-  }
   // cleans up games that are older than an hour
   const channels = await hop.channels.getAll(PROJECT_ID).catch(() => []);
 

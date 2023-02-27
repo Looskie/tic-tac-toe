@@ -111,13 +111,14 @@ export default function Game() {
 
     setLoading(true);
     Api.joinGame(gameID as string)
-      .then((game) => {
-        if ("success" in game) {
+      .then((res) => {
+        if (!res.success) {
           router.push("/");
+          alert(res.error);
           return;
         }
 
-        setGame(game);
+        setGame(res.data);
       })
       .finally(() => setLoading(false));
   }, [gameID]);

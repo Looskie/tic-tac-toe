@@ -1,38 +1,55 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
-import { GameState } from "../../types";
+import { z } from "zod";
+import { APIResponse, GameState } from "../../types";
 import { MESSAGE_NAMES } from "../../utils/Commons";
 import { checkWinner } from "../../utils/Helpers";
 import { hop } from "../../utils/Hop";
 
+const bodySchema = z.object({
+  game_id: z.string().min(5),
+  user_id: z.string().min(5),
+  move: z.array(z.number()).nonempty().length(2),
+});
+
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<{ success: boolean }>
+  res: NextApiResponse<APIResponse>
 ) {
-  if (req.method !== "POST") return res.status(405);
+  if (req.method !== "POST")
+    return res
+      .status(405)
+      .json({ success: false, error: "Must be a post request" });
 
-  const gameID = req.body.gameID;
-  const userID = req.body.userID;
-  const [row, column] = req.body.move;
+  const body = bodySchema.safeParse(req.body);
+  if (!body.success)
+    return res.status(400).json({ success: false, error: body.error.message });
 
-  const gameChannel = await hop.channels.get(gameID).catch((err) => {
+  const gameID = body.data.game_id;
+  const userID = body.data.user_id;
+  const [row, column] = body.data.move;
+
+  const gameChannel = await hop.channels.get(gameID).catch(() => {
     res.status(404).json({
       success: false,
+      error: "Game not found",
     });
 
     return null;
   });
+
   if (!gameChannel) return;
 
   const gameChannelState = gameChannel.state as unknown as GameState;
   if (!gameChannelState.players.includes(userID))
     return res.status(400).json({
       success: false,
+      error: "User not in game",
     });
 
   if (gameChannelState.turn !== userID)
     return res.status(400).json({
       success: false,
+      error: "Not your turn",
     });
 
   const newBoard = [...gameChannelState.board];
@@ -61,8 +78,6 @@ export default async function handler(
   // check if game is over
   const winner = checkWinner(newBoard);
 
-  res.status(204);
-
   if (winner !== null) {
     await gameChannel.publishMessage(MESSAGE_NAMES.GAME_OVER, {
       winner: winner === "draw" ? "draw" : winner === "X" ? xUser : oUser,
@@ -70,4 +85,9 @@ export default async function handler(
 
     hop.channels.delete(gameID);
   }
+
+  res.json({
+    success: true,
+    data: undefined,
+  });
 }

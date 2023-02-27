@@ -1,28 +1,43 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
-import { GameState } from "../../../types";
+import { z } from "zod";
+import { APIResponse, GameState } from "../../../types";
 import { MESSAGE_NAMES } from "../../../utils/Commons";
 import { hop } from "../../../utils/Hop";
 
-export interface CreateGameResponse extends GameState {
-  id: string;
-}
+const bodySchema = z.object({
+  user_id: z.string().min(5),
+});
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<
-    | CreateGameResponse
-    | {
-        success: false;
-      }
+    APIResponse<
+      {
+        id: string;
+      } & GameState
+    >
   >
 ) {
-  if (req.method !== "POST") return res.status(405);
+  if (req.method !== "POST")
+    return res.status(405).json({
+      success: false,
+      error: "Must be a post request",
+    });
+
+  const body = bodySchema.safeParse(req.body);
+  if (!body.success)
+    return res.status(400).json({
+      success: false,
+      error: body.error.message,
+    });
 
   const gameID = req.query.id as string;
+  const userID = body.data.user_id;
+
   const gameChannel = await hop.channels.get(gameID).catch(() => {
     res.status(404).json({
       success: false,
+      error: "Game not found",
     });
 
     return null;
@@ -32,16 +47,15 @@ export default async function handler(
   const gameChannelState = gameChannel.state as unknown as GameState;
   if (
     gameChannelState.players.length >= 2 &&
-    !gameChannelState.players.includes(req.body.userID)
+    !gameChannelState.players.includes(userID)
   )
     return res.status(400).json({
       success: false,
+      error: "Game is full",
     });
 
   // put user in game
-  const newPlayers = [
-    ...new Set([...gameChannelState.players, req.body.userID]),
-  ];
+  const newPlayers = [...new Set([...gameChannelState.players, userID])];
 
   const turn =
     newPlayers.length === 2
@@ -52,7 +66,7 @@ export default async function handler(
         : gameChannelState.turn
       : "";
 
-  if (!gameChannelState.players.includes(req.body.userID)) {
+  if (!gameChannelState.players.includes(userID)) {
     await hop.channels.setState(gameID, {
       ...gameChannel.state,
       players: newPlayers,
@@ -62,17 +76,20 @@ export default async function handler(
 
   // player join
   await hop.channels.publishMessage(gameID, MESSAGE_NAMES.PLAYER_JOIN, {
-    userId: req.body.userID,
+    userId: userID,
     players: newPlayers,
     turn,
   });
 
   return res.status(200).json({
-    id: gameChannel.id,
-    board: gameChannelState.board,
-    players: newPlayers,
-    turn,
-    winner: gameChannelState.winner,
-    created_at: gameChannelState.created_at,
+    success: true,
+    data: {
+      id: gameChannel.id,
+      board: gameChannelState.board,
+      players: newPlayers,
+      turn,
+      winner: gameChannelState.winner,
+      created_at: gameChannelState.created_at,
+    },
   });
 }

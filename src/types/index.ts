@@ -1,4 +1,5 @@
 import { Timestamp } from "@onehop/js";
+import { ZodError } from "zod";
 
 export interface GameState {
   players: string[];
@@ -14,3 +15,13 @@ export interface FetchCapybaraResponse {
   width: number;
   height: number;
 }
+
+export type APIResponse<T extends any = undefined> =
+  | {
+      success: true;
+      data: T;
+    }
+  | {
+      success: false;
+      error: string;
+    };

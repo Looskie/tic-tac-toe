@@ -58,10 +58,13 @@ export default function Home() {
   const createGame = async () => {
     if (creating) return;
     setCreating(true);
-    const game = await Api.createGame();
+
+    const res = await Api.createGame();
     setCreating(false);
 
-    router.push(`/game/${game.id}`);
+    if (!res.success) return alert(res.error);
+
+    router.push(`/game/${res.data.id}`);
   };
 
   if (creating)
