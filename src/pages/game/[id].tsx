@@ -25,6 +25,7 @@ const Container = styled("div", {
   "> p": {
     maxWidth: "30ch",
     userSelect: "none",
+    alignSelf: "center",
   },
 
   span: {
