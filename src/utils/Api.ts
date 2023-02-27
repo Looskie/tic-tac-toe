@@ -1,3 +1,4 @@
+import { nanoid } from "nanoid";
 import { APIResponse, GameState } from "../types";
 
 export class Api {
@@ -6,15 +7,28 @@ export class Api {
       ? localStorage.getItem("user_id")
       : "lol xddd";
 
+  static getUserID() {
+    if (!Api.user_id || Api.user_id === "") {
+      const id = nanoid(15);
+      this.user_id = id;
+      localStorage.setItem("user_id", id);
+
+      return id;
+    } else {
+      return Api.user_id;
+    }
+  }
+
   static async createGame(): Promise<
     APIResponse<{ id: string; game: GameState }>
   > {
+    const userId = this.getUserID();
     const game = await fetch("/api/create", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ user_id: this.user_id }),
+      body: JSON.stringify({ user_id: userId }),
     }).then((res) => res.json());
 
     return game;
@@ -23,12 +37,14 @@ export class Api {
   static async joinGame(
     gameID: string
   ): Promise<APIResponse<GameState & { id: string }>> {
+    const userId = this.getUserID();
+
     return await fetch(`/api/join/${gameID}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ user_id: this.user_id }),
+      body: JSON.stringify({ user_id: userId }),
     })
       .then((res) => res.json())
       .catch((err) => err);
@@ -39,13 +55,15 @@ export class Api {
     x: number,
     y: number
   ): Promise<APIResponse> {
+    const userId = this.getUserID();
+
     const game = await fetch(`/api/move`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user_id: this.user_id,
+        user_id: userId,
         game_id: gameID,
         move: [x, y],
       }),
