@@ -71,4 +71,42 @@ export class Api {
 
     return game;
   }
+
+  static async rematch(
+    gameId: string
+  ): Promise<APIResponse<{ id: string; game: GameState }>> {
+    const userId = this.getUserID();
+
+    const game = await fetch("/api/rematch", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        previous_match: gameId,
+      }),
+    }).then((res) => res.json());
+
+    return game;
+  }
+
+  static async acceptRematch(
+    gameId: string
+  ): Promise<APIResponse<{ id: string; game: GameState }>> {
+    const userId = this.getUserID();
+
+    const game = await fetch("/api/rematch/accept", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        previous_match: gameId,
+      }),
+    }).then((res) => res.json());
+
+    return game;
+  }
 }
