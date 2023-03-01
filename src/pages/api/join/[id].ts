@@ -85,11 +85,8 @@ export default async function handler(
     success: true,
     data: {
       id: gameChannel.id,
-      board: gameChannelState.board,
-      players: newPlayers,
+      ...gameChannelState,
       turn,
-      winner: gameChannelState.winner,
-      created_at: gameChannelState.created_at,
     },
   });
 }

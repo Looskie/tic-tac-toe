@@ -52,8 +52,6 @@ export default async function handler(
     created_at: new Date().toISOString(),
   };
 
-  console.log(newChannelState);
-
   // reset board
   await gameChannel.setState(newChannelState);
 

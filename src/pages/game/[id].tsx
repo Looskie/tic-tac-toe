@@ -280,6 +280,15 @@ export default function Game() {
         })}
       </Grid>
       <span>Your are {playersIndicator}</span>
+      {game.score !== undefined ? (
+        <span>
+          Score:{" "}
+          {playersIndicator !== "X" ? <b>{game.score[0]}</b> : game.score[0]} -{" "}
+          {playersIndicator !== "O" ? <b>{game.score[1]}</b> : game.score[1]}
+        </span>
+      ) : (
+        <span>Score: 0 - 0</span>
+      )}
     </Container>
   );
 }

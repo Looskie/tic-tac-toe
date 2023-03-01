@@ -7,6 +7,9 @@ export interface GameState {
   turn: string;
   winner: string | null;
   created_at: Timestamp;
+
+  // index 0: first player, index 1: second player
+  score?: [number, number];
 }
 
 export interface FetchCapybaraResponse {

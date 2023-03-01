@@ -79,8 +79,21 @@ export default async function handler(
   const winner = checkWinner(newBoard);
 
   if (winner !== null) {
+    const score = gameChannelState.score ?? [0, 0];
+
+    if (winner === "X") {
+      score[0] += 1;
+    } else if (winner === "O") {
+      score[1] += 1;
+    }
+
     await gameChannel.publishMessage(MESSAGE_NAMES.GAME_OVER, {
       winner: winner === "draw" ? "draw" : winner === "X" ? xUser : oUser,
+    });
+
+    await gameChannel.setState({
+      ...gameChannelState,
+      score: score,
     });
   }
 
