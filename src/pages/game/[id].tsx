@@ -67,12 +67,14 @@ export default function Game() {
   const [loading, setLoading] = useState(true);
   const [game, setGame] = useState<GameState | null>(null);
   const [capybara, setCapybara] = useState<FetchCapybaraResponse | null>(null);
+  const [requestedRematch, setRequestedRematch] = useState(false);
+  const [rematch, setRematch] = useState<GameState | null>(null);
 
   const router = useRouter();
-  const gameID = router.query.id;
+  const gameId = router.query.id;
 
   useChannelMessage<{ board: NonNullable<typeof game>["board"]; turn: string }>(
-    gameID as string,
+    gameId as string,
     MESSAGE_NAMES.UPDATE_GAME,
     (data) => {
       if (!game) return;
@@ -85,7 +87,7 @@ export default function Game() {
     userId: string;
     players: string[];
     turn: string;
-  }>(gameID as string, MESSAGE_NAMES.PLAYER_JOIN, (data) => {
+  }>(gameId as string, MESSAGE_NAMES.PLAYER_JOIN, (data) => {
     if (!game) return;
 
     setGame({
@@ -97,21 +99,40 @@ export default function Game() {
 
   useChannelMessage<{
     winner: string;
-  }>(gameID as string, MESSAGE_NAMES.GAME_OVER, (data) => {
+  }>(gameId as string, MESSAGE_NAMES.GAME_OVER, (data) => {
     if (!game) return;
 
     setGame({
       ...game,
       winner: data.winner,
     });
+
+    setRematch(null);
+    setRequestedRematch(false);
+  });
+
+  useChannelMessage<{
+    id: string;
+    game: GameState;
+  }>(gameId as string, MESSAGE_NAMES.REMATCH, (data) => {
+    setRematch(data.game);
+  });
+
+  useChannelMessage<{
+    id: string;
+    game: GameState;
+  }>(gameId as string, MESSAGE_NAMES.REMATCH_ACCEPTED, (data) => {
+    setGame(data.game);
+    setRequestedRematch(false);
+    setRematch(null);
   });
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!gameID) return;
+    if (!gameId) return;
 
     setLoading(true);
-    Api.joinGame(gameID as string)
+    Api.joinGame(gameId as string)
       .then((res) => {
         if (!res.success) {
           router.push("/");
@@ -122,7 +143,7 @@ export default function Game() {
         setGame(res.data);
       })
       .finally(() => setLoading(false));
-  }, [gameID]);
+  }, [gameId]);
 
   const fetchCapybara = async () => {
     const capy = (await fetch("https://api.capy.lol/v1/capybara", {
@@ -152,9 +173,31 @@ export default function Game() {
               : "https://preview.redd.it/lzinlzzzgr481.jpg?width=640&crop=smart&auto=webp&s=e6aba10ce513791107e89e8106255b8c6903f86e"
           }
         />
+
         <BtnWrapper>
           <Button onClick={() => router.push("/")} secondary>
             back to lobby
+          </Button>
+          <Button
+            onClick={async (e) => {
+              if (rematch) {
+                await Api.acceptRematch(gameId as string);
+                setRequestedRematch(true);
+
+                return;
+              }
+
+              setRequestedRematch(true);
+              await Api.rematch(gameId as string);
+            }}
+            disabled={requestedRematch}
+            secondary
+          >
+            {requestedRematch && rematch
+              ? "waiting for other player..."
+              : rematch
+              ? "accept rematch"
+              : "rematch?"}
           </Button>
         </BtnWrapper>
       </Container>
@@ -168,7 +211,7 @@ export default function Game() {
       <Container>
         <h1>waiting for players...</h1>
         <p>
-          Your code is <span>{gameID}</span> in the meantime, want to view a
+          Your code is <span>{gameId}</span> in the meantime, want to view a
           capybara?
         </p>
         <BtnWrapper>
@@ -208,7 +251,7 @@ export default function Game() {
                   const newBoard = game.board;
                   if (newBoard[rowIndex][columnIndex]) return;
 
-                  Api.move(gameID as string, rowIndex, columnIndex);
+                  Api.move(gameId as string, rowIndex, columnIndex);
 
                   newBoard[rowIndex][columnIndex] = playersIndicator;
 
