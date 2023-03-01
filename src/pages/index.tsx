@@ -44,15 +44,15 @@ const GameType = styled("button", {
 export default function Home() {
   const [showJoinGameUI, setShowJoinGameUI] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [gameIDInput, setGameIDInput] = useState("");
+  const [gameIdInput, setGameIdInput] = useState("");
 
   const router = useRouter();
 
   const joinGame = () => {
-    if (gameIDInput.length !== 5)
-      return alert("Game ID must be 5 characters long");
+    if (gameIdInput.length !== 5)
+      return alert("Game id must be 5 characters long");
 
-    router.push(`/game/${gameIDInput}`);
+    router.push(`/game/${gameIdInput}`);
   };
 
   const createGame = async () => {
@@ -93,8 +93,8 @@ export default function Home() {
         <GameType noScale={true}>
           <h1>join game</h1>
           <Input
-            value={gameIDInput}
-            onChange={({ target: { value } }) => setGameIDInput(value)}
+            value={gameIdInput}
+            onChange={({ target: { value } }) => setGameIdInput(value)}
             placeholder="Game ID"
           />
           <div>
