@@ -91,6 +91,23 @@ export class Api {
     return game;
   }
 
+  static async ackRematch(gameId: string): Promise<APIResponse> {
+    const userId = this.getUserID();
+
+    const game = await fetch("/api/rematch/ack", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        game_id: gameId,
+      }),
+    }).then((res) => res.json());
+
+    return game;
+  }
+
   static async acceptRematch(
     gameId: string
   ): Promise<APIResponse<{ id: string; game: GameState }>> {

@@ -28,6 +28,10 @@ export default async function handler(
     return res.status(400).json({ success: false, error: body.error.message });
 
   const previousMatch = body.data.previous_match;
+  const userId = body.data.user_id;
+
+  // await a fake 5 second promise
+  await new Promise((resolve) => setTimeout(resolve, 5000));
 
   const gameChannel = await hop.channels.get(previousMatch).catch(() => {
     res.status(404).json({
@@ -42,7 +46,7 @@ export default async function handler(
   const gameChannelState = gameChannel.state as unknown as GameState;
 
   const newChannelState = {
-    ...gameChannel.state,
+    ...gameChannelState,
     board: new Array(3).fill(new Array(3).fill(undefined)),
     turn:
       Math.random() < 0.5
@@ -50,6 +54,9 @@ export default async function handler(
         : gameChannelState.players[1],
     winner: null,
     created_at: new Date().toISOString(),
+    [userId === gameChannelState.players[0]
+      ? "xWantsRematch"
+      : "oWantsRematch"]: true,
   };
 
   // reset board

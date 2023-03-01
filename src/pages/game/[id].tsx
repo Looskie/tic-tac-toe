@@ -127,6 +127,17 @@ export default function Game() {
     setRematch(null);
   });
 
+  // Ack rematch
+  useEffect(() => {
+    if (!requestedRematch || !rematch || !gameId) return;
+
+    const interval = setInterval(async () => {
+      await Api.ackRematch(gameId as string);
+    }, 1_000);
+
+    return () => clearInterval(interval);
+  }, [requestedRematch, rematch, gameId]);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!gameId) return;
@@ -205,6 +216,8 @@ export default function Game() {
 
   // game creator is always x
   const playersIndicator = game.players[0] === Api.user_id ? "X" : "O";
+
+  console.log(game);
 
   return game.players.length < 2 ? (
     <>

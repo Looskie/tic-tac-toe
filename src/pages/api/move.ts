@@ -94,6 +94,8 @@ export default async function handler(
     await gameChannel.setState({
       ...gameChannelState,
       score: score,
+      xWantsRematch: false,
+      oWantsRematch: false,
     });
   }
 

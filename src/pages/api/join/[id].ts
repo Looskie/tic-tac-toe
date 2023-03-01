@@ -86,6 +86,7 @@ export default async function handler(
     data: {
       id: gameChannel.id,
       ...gameChannelState,
+      players: newPlayers,
       turn,
     },
   });
