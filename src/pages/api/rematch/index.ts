@@ -30,9 +30,6 @@ export default async function handler(
   const previousMatch = body.data.previous_match;
   const userId = body.data.user_id;
 
-  // await a fake 5 second promise
-  await new Promise((resolve) => setTimeout(resolve, 5000));
-
   const gameChannel = await hop.channels.get(previousMatch).catch(() => {
     res.status(404).json({
       success: false,
