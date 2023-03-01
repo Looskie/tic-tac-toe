@@ -41,7 +41,7 @@ const BtnWrapper = styled("div", {
   alignSelf: "center",
 });
 
-const Grid = styled("button", {
+const Grid = styled("div", {
   display: "grid",
   gridTemplateColumns: "repeat(3, 1fr)",
   gridTemplateRows: "repeat(3, 1fr)",
