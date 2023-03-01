@@ -7,7 +7,7 @@ import { hop } from "../../utils/Hop";
 
 const bodySchema = z.object({
   game_id: z.string().min(5),
-  user_id: z.string().min(5),
+  user_id: z.string().min(15),
   move: z.array(z.number()).nonempty().length(2),
 });
 
@@ -82,8 +82,6 @@ export default async function handler(
     await gameChannel.publishMessage(MESSAGE_NAMES.GAME_OVER, {
       winner: winner === "draw" ? "draw" : winner === "X" ? xUser : oUser,
     });
-
-    hop.channels.delete(gameID);
   }
 
   res.json({

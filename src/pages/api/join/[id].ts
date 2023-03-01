@@ -5,7 +5,7 @@ import { MESSAGE_NAMES } from "../../../utils/Commons";
 import { hop } from "../../../utils/Hop";
 
 const bodySchema = z.object({
-  user_id: z.string().min(5),
+  user_id: z.string().min(15),
 });
 
 export default async function handler(

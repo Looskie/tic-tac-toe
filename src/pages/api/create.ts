@@ -6,7 +6,7 @@ import { APIResponse, GameState } from "../../types";
 import { z } from "zod";
 
 const bodySchema = z.object({
-  user_id: z.string().min(5),
+  user_id: z.string().min(15),
 });
 
 export default async function handler(
