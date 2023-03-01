@@ -15,7 +15,6 @@ export default async function handler(
   for (const channel of channels) {
     const channelState = channel.state as unknown as GameState;
 
-    console.log(lessThanOneHourAgo(new Date(channelState.created_at)));
     if (lessThanOneHourAgo(new Date(channelState.created_at))) {
       continue;
     }
