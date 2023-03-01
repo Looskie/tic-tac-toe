@@ -170,7 +170,7 @@ export default function Game() {
           src={
             game.winner === Api.user_id
               ? "https://api.capy.lol/v1/capybara/149"
-              : "https://preview.redd.it/lzinlzzzgr481.jpg?width=640&crop=smart&auto=webp&s=e6aba10ce513791107e89e8106255b8c6903f86e"
+              : "https://api.capy.lol/v1/capybara/740"
           }
         />
 
